@@ -2,7 +2,8 @@
 
 const asyncHandler  = (requestHandler)=>{
      return (req,res,next) => {
-        Promise.resolve(requestHandler(req,res,next)).catch((err)=>next(err))
+        Promise.resolve(requestHandler(req,res,next))
+        .catch((err)=>next(err))
     }
 }
 
@@ -14,7 +15,7 @@ export {asyncHandler}
 // const asyncHandler = (fn) => {async()=>{}} 
 // const asyncHandler = (fn) => async() => {} 
 
-//creatinf a utl for async function with try catch method
+//creatinf a utlity for async function with try catch method
 
 // const asyncHandler = (fn)=> async(req,res,next) => {
 //    try{
