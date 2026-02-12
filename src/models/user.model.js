@@ -46,11 +46,11 @@ const userSchema = new Schema({
     ]
 },{timestamps:true})
 
-userSchema.pre("save", async function(next){ //  we are not using arrow function because it is not suitable to point the object in arrow function 
-    if(this.isModified("password")){
+userSchema.pre("save", async function(){ //  we are not using arrow function because it is not suitable to point the object in arrow function 
+    if(!this.isModified("password")) return;
     this.password= await bcrypt.hash(this.password,10) 
-    }// bcrypt.hash is used to encypt the passowrd
-    next() //next will take it to next middleware if exists else to the response 
+    // bcrypt.hash is used to encypt the passowrd
+    // //next will take it to next middleware if exists else to the response 
 })
 
 userSchema.methods.isPasswordCorrect = async function(password){
@@ -58,7 +58,7 @@ userSchema.methods.isPasswordCorrect = async function(password){
 }// by using.method we can create our own custom method
 
 userSchema.methods.generateAccessToken = function(){
-    jwt.sign(
+    return jwt.sign(
         {
             _id: this._id,
             email: this.email,
@@ -73,13 +73,13 @@ userSchema.methods.generateAccessToken = function(){
 }
 
 userSchema.methods.generateRefreshToken = function(){
-    jwt.sign(
+    return jwt.sign(
         {
             _id: this._id,
         },
         process.env.REFRESH_TOKEN_SECRET,
         {
-            expiresIn : process.env.REFRESH_TOKEN_SECRET
+            expiresIn : process.env.REFRESH_TOKEN_EXPIRY
         }
     )
 }
