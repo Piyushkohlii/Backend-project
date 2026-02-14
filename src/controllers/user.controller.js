@@ -158,7 +158,7 @@ const logoutUser= asyncHandler(async(req,res)=>{
             }
         },
         {
-            new: true
+            new: true // it is used to update changes in the mongodb
         }
     )
     const options = {
@@ -171,14 +171,14 @@ const logoutUser= asyncHandler(async(req,res)=>{
     .clearCookie("refreshToken",options)
     .json(new ApiResponse(200,{},"User logged Out"))
 })
-  
+
 const refreshAccessToken = asyncHandler(async(req,res)=>{
    const incomingRefreshToken = req.cookies.refreshToken || req.body.refreshToken
    if(!incomingRefreshToken){
     throw new ApiError(401,"Unauthorised request")
    }
    try {
-    const decodedToken = jwt.verify(incomingRefreshToken,process.env.REFRESH_TOKEN_SECRET)
+    const decodedToken = jwt.verify(incomingRefreshToken,process.env.REFRESH_TOKEN_SECRET) //it will return the payload data of the refreshToken that is ._id
     
     const user = await User.findById(decodedToken?._id)
     if(!user){
@@ -229,7 +229,7 @@ const changeCurrentPassword = asyncHandler(async(req,res)=>{
 const getCurrentUser = asyncHandler(async(req,res)=>{
     return res
     .status(200)
-    .json(200,req.user,"current user fetched successfuly")
+    .json(new ApiResponse(200,req.user,"current user fetched successfuly"))
 
 })
 
@@ -240,7 +240,7 @@ const updateAccountDetails = asyncHandler(async(req,res)=>{
         throw new ApiError(600,"All field are required")
     }
 
-    const user = User.findByIdAndUpdate(
+    const user = await User.findByIdAndUpdate(
         req.user?._id,
         {
             $set:{
@@ -284,7 +284,7 @@ const updateUserAvatar = asyncHandler(async(req,res)=>{
 
 const updateUserCoverImage = asyncHandler(async(req,res)=>{
     const coverImageLocalPath = req.file?.path
-    if(!coberImageLocalPath){
+    if(!coverImageLocalPath){
         throw new ApiError(400,"Cover image file is missing")
     }
     const coverImage = await uploadOnCloudinary(coverImageLocalPath)

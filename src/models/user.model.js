@@ -54,7 +54,7 @@ userSchema.pre("save", async function(){ //  we are not using arrow function bec
 })
 
 userSchema.methods.isPasswordCorrect = async function(password){
-    return await bcrypt.compare(password , this.password) //here the password which user gave and the encrypted passowrd will be compared 
+    return await bcrypt.compare(password , this.password) //here the password which user gave and the encrypted passowrd which is stored in the mongodb will be compared 
 }// by using.method we can create our own custom method
 
 userSchema.methods.generateAccessToken = function(){
