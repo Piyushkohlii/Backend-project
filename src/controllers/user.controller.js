@@ -394,5 +394,55 @@ const getUserChannelProfile = asyncHandler(async(req,res)=>{
    )
 })
 
+const getWatchHistory = asyncHandler(async(req,res)=>{
+    const user =  await User.aggregate([
+        {
+            $match:{
+                _id : new mongoose.Types.ObjectId(req.user._id)
+            }
+        },
+        {
+            $lookup:{
+                from :"videos",
+                localField : "watchHistory",
+                foreignField:"_id", //videos._id
+                as:"watchHistory", // now user have access to the videos he has watched
+                pipeline:[
+                    {
+                        $lookup:{
+                            from: "users",
+                            localfield:"owner",
+                            foreignField:"_id", //users._id
+                            as:"owner", // and here the video has accessed the video is of which user
+                            pipeline:[
+                                {
+                                    $project:{ // it projects owner details
+                                        fullName:1,
+                                        username:1,
+                                        avatar:1,
+                                    }
+                                }
+                            ]
+                        }
+                    },
+                    {
+                        $addFields:{ // since lookups return the array and the array have only one element inside it necause video has only one owner 
+                            owner:{
+                                $first:"$owner" //it takes first element from the array and turns it into single object
+                            }
+                        }
+                    }
+                ]
+            }
+        }
+    ])
 
-export {registerUser , loginUser , logoutUser, refreshAccessToken , changeCurrentPassword , getCurrentUser, updateAccountDetails , updateUserAvatar ,updateUserCoverImage ,getUserChannelProfile}
+    return res
+    .status(200)
+    .json(
+        new ApiResponse(200,user[0].watchHistory,"Watch history fetched successfully")
+    )
+})
+
+
+export {registerUser , loginUser , logoutUser, refreshAccessToken , changeCurrentPassword , getCurrentUser, updateAccountDetails , updateUserAvatar ,updateUserCoverImage ,getUserChannelProfile , getWatchHistory}
